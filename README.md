@@ -13,24 +13,33 @@ The project focus on API site without(for now) frontend.
 
 ## Technologies
 
-[] Python
+[x] Python
 
-[] Django
+[x] Django
 
-[x] RabbitMQ
+[] RabbitMQ
 
-[x] Celery
+[] Celery
 
-[x] Redis
+[] Redis
 
-[x] Elasticsearch
+[] Elasticsearch
 
-[x] Pandas
+[] Pandas
 
-[x] NumPy
+[] NumPy
 
-[x] OpenAI API
+[] OpenAI API
 
 [x] Docker
 
-[x] JWT Auth
+[] JWT Auth
+
+## Setup
+
+First you must copy:
+`./InvoiceBrain/.example.pg_service.conf` to `./InvoiceBrain/.pg_service.conf`
+`./InvoiceBrain/.example.pgpass` to `./InvoiceBrain/.pgpass`
+This filles will store credentials to connect to PostgreSQL.
+
+To run application type command `docker-compose up`
