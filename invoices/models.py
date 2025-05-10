@@ -16,7 +16,7 @@ class Invoice(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.number)
+        return f"Invoice {self.number} - {self.principal_company_name}"
 
     def was_payed(self):
         return self.payment_date != None
