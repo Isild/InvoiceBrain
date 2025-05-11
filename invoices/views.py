@@ -33,22 +33,22 @@ def search_invoices(request):
             "error": "Missing query param ?q=..."
         }, status=400)
     
-    # results = InvoiceDocument.search().query(
-    #     "multi_match", 
-    #     query=query,
-    #     fields=['principal_company_name', 'reciepient_company_name']
-    # )
+    results = InvoiceDocument.search().query(
+        "multi_match", 
+        query=query,
+        fields=['principal_company_name', 'reciepient_company_name']
+    )
     # results = InvoiceDocument.search().query(
     #     "match", 
     #     number=query
     # )
-    results = InvoiceDocument.search().query(
-        "match", 
-        number={
-            'query':query,
-            'fuzziness':'AUTO'
-        }
-    )
+    # results = InvoiceDocument.search().query(
+    #     "match", 
+    #     number={
+    #         'query':query,
+    #         'fuzziness':'AUTO'
+    #     }
+    # )
 
 
     sort_field = f"-{sort_by}" if order == 'desc' else sort_by
