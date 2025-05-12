@@ -74,6 +74,8 @@ services:
       - redis
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
+    networks:
+      - services
 
 volumes:
   pgdata:

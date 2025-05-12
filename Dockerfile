@@ -17,8 +17,16 @@ WORKDIR /app
 # Kopiowanie plików projektu
 COPY . /app/
 
+CMD ["chmod", "0600", "InvoiceBrain/.pg_service.conf"]
+CMD ["chmod", "0600", "InvoiceBrain/.pgpass"]
+
 # Instalacja zależności z pip
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+
+# TODO: add auto migrate and create elasticsearch 
+CMD ["python", "manage.py", "migrate"]
+CMD ["python", "manage.py", "search_index", "--rebuild"]
+
 # Komenda domyślna
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

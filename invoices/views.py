@@ -8,10 +8,17 @@ from rest_framework.decorators import api_view
 from .documents import InvoiceDocument
 from .models import Invoice
 from .serializers import InvoiceSerializer
+from notifications.tasks import send_invoice_notification
+
 
 class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
+
+    def perform_create(self, serializer):
+        invoice = serializer.save()
+        send_invoice_notification.delay("email@test.com", invoice.id)
+
 
 @api_view(['GET'])
 def elastic_check(request):
@@ -21,6 +28,7 @@ def elastic_check(request):
         return JsonResponse({"status":"connected"})
     else:
         return JsonResponse({"status":"not connected"}, status=500)
+
 
 @api_view(['GET'])
 def search_invoices(request):
