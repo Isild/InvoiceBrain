@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from .documents import InvoiceDocument
 from .models import Invoice
 from .serializers import InvoiceSerializer
-from notifications.tasks import send_invoice_notification
+from notifications.tasks import send_new_invoice_notification, send_paid_invoice_notification
 
 
 class InvoiceViewSet(viewsets.ModelViewSet):
@@ -17,7 +17,15 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         invoice = serializer.save()
-        send_invoice_notification.delay("email@test.com", invoice.id)
+        send_new_invoice_notification.delay("email@test.com", invoice.id)
+
+    def perform_update(self, serializer):
+        old_invoice_payment_date = self.get_object().payment_date
+
+        invoice = serializer.save()
+
+        if invoice.payment_date != old_invoice_payment_date and invoice.payment_date:
+            send_paid_invoice_notification.delay("email@test.com", invoice.id, invoice.payment_date)
 
 
 @api_view(['GET'])

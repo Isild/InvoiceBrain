@@ -5,6 +5,7 @@
 - [Setup](#setup)
 - [More detailed information about modules](#more-detailed-information-about-modules)
 - [Application view](#application-view)
+- [Celery](#celery)
 
 ## General info
 
@@ -19,11 +20,11 @@ The project focus on API site without(for now) frontend.
 
 [] RabbitMQ
 
-[] Celery
+[x] Celery
 
-[] Redis
+[x] Redis
 
-[] Elasticsearch
+[x] Elasticsearch
 
 [] Pandas
 
@@ -43,3 +44,19 @@ First you must copy:
 This filles will store credentials to connect to PostgreSQL.
 
 To run application type command `docker-compose up`
+
+When all containers are running get into `invoicebrain_web_1` container.
+Then run db migrations `python manage.py migrate` and create Elasticsearch datas `python manage.py search_index --rebuild`.
+Run `python manage.py migrate django_celery_beat` to create cron table. // zobaczyć czy się czasami nie uruchamia
+
+You can also create superuser to see data in django admin page.
+
+If you want to see sended mail you can go to `http://localhost:8025`
+
+# Celery
+
+Used to sending notifications about:
+
+- new invoice
+- invoice was paid
+- invoice payment date overdue

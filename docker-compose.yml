@@ -43,7 +43,7 @@ services:
       - "9300:9300"
     networks:
       - elk
-    mem_limit: 2g
+    mem_limit: 1g
       
   kibana:
     image: docker.elastic.co/kibana/kibana:9.0.0
@@ -67,13 +67,25 @@ services:
 
   celery:
     build: .
-    command: celery -A InvoiceBrain worker --loglevel=info
+    entrypoint: ["/bin/sh", "-c", "chmod 600 InvoiceBrain/.pgpass && chmod 600 InvoiceBrain/.pg_service.conf && celery -A InvoiceBrain worker --loglevel=info"]
     volumes:
       - .:/code
     depends_on:
       - redis
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
+    networks:
+      - services
+
+  celery-beat:
+    build: .
+    command: celery -A InvoiceBrain beat --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - web
+      - celery
     networks:
       - services
 
