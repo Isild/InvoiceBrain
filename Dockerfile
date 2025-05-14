@@ -10,6 +10,7 @@ ENV PGPASSFILE=/app/InvoiceBrain/.pgpass
 
 # Instalacja zależności systemowych
 RUN apt-get update && apt-get install -y netcat-openbsd gcc postgresql-client && apt-get clean
+RUN apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Katalog roboczy
 WORKDIR /app
@@ -17,16 +18,9 @@ WORKDIR /app
 # Kopiowanie plików projektu
 COPY . /app/
 
-CMD ["chmod", "0600", "InvoiceBrain/.pg_service.conf"]
-CMD ["chmod", "0600", "InvoiceBrain/.pgpass"]
-
 # Instalacja zależności z pip
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-
-# TODO: add auto migrate and create elasticsearch 
-CMD ["python", "manage.py", "migrate"]
-CMD ["python", "manage.py", "search_index", "--rebuild"]
 
 # Komenda domyślna
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

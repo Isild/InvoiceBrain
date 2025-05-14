@@ -3,7 +3,7 @@ version: '3.9'
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: ["sh", "/app/entrypoint.sh"]
     environment:
       ELASTICSEARCH_HOST: http://elastic:9200
     volumes:
@@ -12,6 +12,7 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - elastic
     networks:
       - elk
       - services

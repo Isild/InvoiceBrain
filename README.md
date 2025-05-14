@@ -43,6 +43,8 @@ First you must copy:
 `./InvoiceBrain/.example.pgpass` to `./InvoiceBrain/.pgpass`
 This filles will store credentials to connect to PostgreSQL.
 
+Add `chmod +x entrypoint.sh`
+
 To run application type command `docker-compose up`
 
 When all containers are running get into `invoicebrain_web_1` container.
