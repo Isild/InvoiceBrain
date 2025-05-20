@@ -9,6 +9,7 @@ class InvoicesConfig(AppConfig):
     def ready(self):
         from django.db.utils import OperationalError, ProgrammingError
         from django_celery_beat.models import IntervalSchedule, PeriodicTask
+        import invoices.documents 
 
         try:
             schedule_check_overdude_invoices, _ = IntervalSchedule.objects.update_or_create(

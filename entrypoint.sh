@@ -30,7 +30,7 @@ done
 
 if [ "$it" -lt "$maxRetryTimes" ]; then
     echo "Starting setup elasticsearch data\n"
-    echo "Are you sure you want to delete the 'invoices' indices? [y/N]: y" | python manage.py search_index --rebuild
+    echo "Are you sure you want to delete the 'invoices' indices? [y/N]: y" | python manage.py search_index --rebuild -f
     echo "Setup elasticsearch data successfully compleated"
 fi
 

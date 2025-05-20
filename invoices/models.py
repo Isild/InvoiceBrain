@@ -12,7 +12,7 @@ class Invoice(models.Model):
     payment_date = models.DateTimeField(null=True)
     total = models.IntegerField()
     description = models.CharField(max_length=2048, default='')
-    products = models.JSONField(default={})
+    products = models.JSONField(default=dict)
     # file = models.FileField(upload_to="invoices/")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

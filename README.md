@@ -6,6 +6,7 @@
 - [More detailed information about modules](#more-detailed-information-about-modules)
 - [Application view](#application-view)
 - [Celery](#celery)
+- [Elasticsearch](#elasticsearch)
 
 ## General info
 
@@ -55,6 +56,8 @@ You can also create superuser to see data in django admin page.
 
 If you want to see sended mail you can go to `http://localhost:8025`
 
+! Fields with numbers are stored in int because later will be helper which convert number to float without losing precision.
+
 # Celery
 
 Used to sending notifications about:
@@ -62,3 +65,13 @@ Used to sending notifications about:
 - new invoice
 - invoice was paid
 - invoice payment date overdue
+
+# Elasticsearch
+
+App have searchs on invoice resource.
+You can search at:
+
+- invoice number at endpoint `/invoices/search-by-number`
+- invoice companies name at endpoint `/invoices/search-by-companies`
+- invoice dates at endpoint `/invoices/search-by-dates`
+- invoice description and products list at endpoint `/invoices/search-by-descriptions-products`
