@@ -3,8 +3,7 @@
 - [General info](#general-info)
 - [Technologies](#technologies)
 - [Setup](#setup)
-- [More detailed information about modules](#more-detailed-information-about-modules)
-- [Application view](#application-view)
+- [Documentation](#documentation)
 - [Celery](#celery)
 - [Elasticsearch](#elasticsearch)
 
@@ -19,23 +18,27 @@ The project focus on API site without(for now) frontend.
 
 [x] Django
 
-[] RabbitMQ
-
 [x] Celery
 
 [x] Redis
 
 [x] Elasticsearch
 
+[x] Docker
+
 [] Pandas
 
 [] NumPy
 
-[] OpenAI API
+[] RabbitMQ
 
-[x] Docker
+[] OpenAI API invoices tags
+
+[] Upload files to S3
 
 [] JWT Auth
+
+[] Elasticsearch work on entities in relationship + filtering
 
 ## Setup
 
@@ -58,6 +61,17 @@ If you want to see sended mail you can go to `http://localhost:8025`
 
 ! Fields with numbers are stored in int because later will be helper which convert number to float without losing precision.
 
+Services like elastic and kibana can use a lot of memory. To handle it you can change RAM memory usage limit in docker-compose file: `mem_limit: 0.5g`
+
+If entrypoint can't run application due to long time of setting up elastic instance then increase `max RetryTimes`.
+
+## Documentation
+
+At endpoints below you have docoumentation. You can choose which one you prefer:
+
+- `/api/schema/swagger-ui/`
+- `api/schema/redoc/`
+
 # Celery
 
 Used to sending notifications about:
@@ -69,9 +83,14 @@ Used to sending notifications about:
 # Elasticsearch
 
 App have searchs on invoice resource.
+
 You can search at:
 
 - invoice number at endpoint `/invoices/search-by-number`
 - invoice companies name at endpoint `/invoices/search-by-companies`
 - invoice dates at endpoint `/invoices/search-by-dates`
 - invoice description and products list at endpoint `/invoices/search-by-descriptions-products`
+
+Documentation for each endpoint can be found in [Documentation](#documentation) section
+
+Here are specific implementation of elasticsearch to speed up searching. More functions with sophisticated filters will be implemented soon.

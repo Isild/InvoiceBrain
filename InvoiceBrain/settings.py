@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
     'django_celery_beat',
     'django_elasticsearch_dsl',
     'django_extensions',
@@ -132,7 +134,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 ELASTICSEARCH_DSL = {
@@ -153,3 +156,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mailhog'
 EMAIL_PORT = 1025
 EMAIL_USE_TLS = False
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'InvoiceBrain API',
+    'DESCRIPTION': 'This application work with invoices',
+    'VERSION': '0.1.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
