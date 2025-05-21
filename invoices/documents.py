@@ -21,6 +21,13 @@ class InvoiceDocument(Document):
         }
     )
     description = fields.TextField()
+    number = fields.TextField()
+    principal_company_name = fields.TextField()
+    reciepient_company_name = fields.TextField()
+    issue_date = fields.DateField()
+    payment_due_date = fields.DateField()
+    payment_date = fields.DateField()
+    total = fields.IntegerField()
 
     class Index:
         name = 'invoices'
@@ -28,13 +35,6 @@ class InvoiceDocument(Document):
     class Django:
         model = Invoice
         fields = [
-            'number',
-            'principal_company_name',
-            'reciepient_company_name',
-            'issue_date',
-            'payment_due_date',
-            'payment_date',
-            'total',
             'created_at',
             'updated_at',
         ]
