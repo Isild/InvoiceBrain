@@ -56,6 +56,7 @@ Then run db migrations `python manage.py migrate` and create Elasticsearch datas
 Run `python manage.py migrate django_celery_beat` to create cron table. // zobaczyć czy się czasami nie uruchamia
 
 You can also create superuser to see data in django admin page.
+`python manage.py createsuperuser`
 
 If you want to see sended mail you can go to `http://localhost:8025`
 
