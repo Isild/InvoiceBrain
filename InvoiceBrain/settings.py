@@ -136,6 +136,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "EXCEPTION_HANDLER": "shared.logging.general_exception_handler.general_exception_handler",
 }
 
 ELASTICSEARCH_DSL = {
@@ -162,4 +163,29 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'This application work with invoices',
     'VERSION': '0.1.0',
     'SERVE_INCLUDE_SCHEMA': False,
+}
+
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "invoicebrain_web_1"]
+
+# filebeat
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/app/app.log',
+            'formatter': 'json',
+        },
+    },
+    'root': {
+        'handlers': ['file'],
+        'level': 'INFO',
+    },
 }

@@ -28,6 +28,7 @@ class InvoiceDocument(Document):
     payment_due_date = fields.DateField()
     payment_date = fields.DateField()
     total = fields.IntegerField()
+    created_at  = fields.DateField()
 
     class Index:
         name = 'invoices'
@@ -35,11 +36,9 @@ class InvoiceDocument(Document):
     class Django:
         model = Invoice
         fields = [
-            'created_at',
             'updated_at',
         ]
 
-    # # TODO: add error handling when wrong data structure
     def prepare_products(self, instance):
         return [
             {

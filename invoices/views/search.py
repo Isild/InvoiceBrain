@@ -85,7 +85,6 @@ class SearchByCompaniesNamesAPIView(APIView):
             return Response({
                 "error": "Missing query param ?company_name=..."
             }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
 
         results = InvoiceDocument.search().query(
             "multi_match", 
@@ -120,7 +119,7 @@ class SearchByCompaniesNamesAPIView(APIView):
     description="Searching incoives base on number using fuzzy search.",
     parameters=[
         OpenApiParameter(name='number', description='Invoice number', required=True, type=str),
-        OpenApiParameter(name='sort_by', description='Pole do sortowania (e.g. created_at)', required=False, type=str),
+        OpenApiParameter(name='sort_by', description='Field to sorting(e.g. created_at)', required=False, type=str),
         OpenApiParameter(name='order', description='Sorting direction: asc lub desc', required=False, type=str),
         OpenApiParameter(name='page', description='Number of pagination page', required=False, type=int),
     ],
@@ -194,7 +193,6 @@ class SearchByCompaniesNamesAPIView(APIView):
                 "error": "Missing query param ?company_name=..."
             }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         
-
         results = InvoiceDocument.search().query(
             "multi_match", 
             query=query,

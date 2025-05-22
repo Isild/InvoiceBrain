@@ -2,12 +2,16 @@ from rest_framework import viewsets
 
 from notifications.tasks import (send_new_invoice_notification,
                                  send_paid_invoice_notification)
+from shared.logging.logger import AppLogger
+from utils.logger_helpers import generate_exception_response
 
 from ..models import Invoice
 from ..serializers import InvoiceSerializer
 
 
 class InvoiceViewSet(viewsets.ModelViewSet):
+    logger = AppLogger()
+
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
 

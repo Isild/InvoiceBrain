@@ -1,6 +1,7 @@
 # My files
 InvoiceBrain/.pg_service.conf
 InvoiceBrain/.pgpass
+logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

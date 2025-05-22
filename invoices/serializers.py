@@ -11,6 +11,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = '__all__'
+        read_only_fields = ("created_at", "updated_at")
 
     number = serializers.CharField()
     principal_company_name = serializers.CharField()
@@ -20,8 +21,6 @@ class InvoiceSerializer(serializers.ModelSerializer):
     payment_date = serializers.DateTimeField(allow_null=True)
     total = serializers.IntegerField()
     description = serializers.CharField()
-    created_at = serializers.DateTimeField()
-    updated_at = serializers.DateTimeField()
     products = ProductSerializer(many=True)
 
     def to_representation(self, instance):

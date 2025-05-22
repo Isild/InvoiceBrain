@@ -13,3 +13,4 @@ redis==5.0.4
 django-celery-beat==2.8.1
 drf-spectacular==0.28.0
 drf-spectacular-sidecar==2025.5.1
+python-json-logger==3.3.0
