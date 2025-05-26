@@ -1,0 +1,66 @@
+- key: django
+  title: Django Logs
+  description: Fields for Django logs in JSON format
+  fields:
+    - name: message
+      type: text
+      description: Log message
+
+    - name: exc_info
+      type: text
+      description: Szczegóły wyjątku (traceback)
+
+    - name: exception_type
+      type: keyword
+      description: Typ wyjątku
+
+    - name: feature
+      type: keyword
+      description: Komponent aplikacji
+
+    - name: path
+      type: keyword
+      description: Ścieżka żądania
+
+    - name: status_code
+      type: integer
+      description: Kod HTTP
+
+    - name: request
+      type: text
+      description: Obiekt WSGI żądania
+
+    - name: request_id
+      type: keyword
+      description: Identyfikator żądania
+
+    - name: level
+      type: keyword
+      description: Poziom logu (INFO, ERROR itd.)
+
+    - name: asctime
+      type: keyword
+      description: Czas logowania (jeśli obecny)
+
+    - name: log
+      type: group
+      fields:
+        - name: offset
+          type: long
+        - name: file
+          type: group
+          fields:
+            - name: path
+              type: keyword
+
+    - name: host
+      type: group
+      fields:
+        - name: name
+          type: keyword
+
+    - name: agent
+      type: group
+      fields:
+        - name: type
+          type: keyword

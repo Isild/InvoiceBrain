@@ -37,13 +37,19 @@ class AppLogger:
             "path": path,
             "request_id": request_id,
             "exception_type": type(exception).__name__ if exception else None,
+            # "timestamp": "twoj wiesz czo"
         }
-        self.logger.error(message, exc_info=exception, extra=extra)
+        if exception:
+            exc_info = (type(exception), exception, exception.__traceback__)
+        else:
+            exc_info = None
+        self.logger.error(message, exc_info=exc_info, extra=extra)
 
     def log_info(self, feature, message, path=None, request_id=None):
         extra = {
             "feature": feature,
             "path": path,
             "request_id": request_id,
+            "log_moj_type": "info"
         }
         self.logger.info(message, extra=extra)

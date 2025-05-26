@@ -1,18 +1,39 @@
 filebeat.inputs:
-  - type: log
+  - type: filestream
+    id: django-logs
     enabled: true
     paths:
-      - /var/log/app/*.log
-    json.keys_under_root: true
-    json.add_error_key: true
+      - /usr/share/filebeat/logs/app.log
+    parsers:
+      - ndjson:
+          overwrite_keys: true
+          add_error_key: true
+    data_stream:
+      type: logs
+      dataset: django.app
+      namespace: default
+    fields:
+      log_type: django
+    fields_under_root: true
+
+filebeat.data_streams.enabled: true
+setup.ilm.enabled: false
+
+setup.template.name: "django-logs"
+setup.template.pattern: "django-logs-*"
 
 output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
-  index: "filebeat-django-%{+yyyy.MM.dd}"
+  hosts: ["http://elastic:9200"]
+  index: "django-logs-%{+yyyy.MM.dd}"
 
 setup.kibana:
   host: "http://kibana:5601"
 
-processors:
-  - add_host_metadata: ~
-  - add_docker_metadata: ~
+logging:
+  level: info
+  to_files: true
+  files:
+    path: /usr/share/filebeat/logs
+    name: filebeat
+    keepfiles: 7
+    permissions: 0644

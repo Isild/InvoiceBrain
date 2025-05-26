@@ -8,7 +8,7 @@ services:
       ELASTICSEARCH_HOST: http://elastic:9200
     volumes:
       - .:/app
-      - ./logs:/var/log/app
+      - ./logs:/logs
     ports:
       - "8000:8000"
     depends_on:
@@ -34,12 +34,16 @@ services:
     mem_limit: 1g
 
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - ELASTIC_PASSWORD=changeme
-      - KIBANA_PASSWORD=changeme
+      - xpack.monitoring.collection.enabled=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     volumes:
       - elasticdata:/var/lib/elasticsearch/data
     ports:
@@ -47,34 +51,53 @@ services:
       - "9300:9300"
     networks:
       - elk
-    mem_limit: 0.5g
+    mem_limit: 2g
       
-  # kibana:
-  #   image: docker.elastic.co/kibana/kibana:9.0.0
-  #   environment:
-  #     SERVER_NAME: kibana
-  #     ELASTICSEARCH_HOST: "http://elastic:9200"
-  #   depends_on:
-  #     - elastic
-  #   ports:
-  #     - "5601:5601"
-  #   networks:
-  #     - elk
-  #   mem_limit: 0.25g
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.1
+    environment:
+      SERVER_NAME: kibana
+      ELASTICSEARCH_HOSTS: "http://elastic:9200"
+    depends_on:
+      - elastic
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    mem_limit: 1g
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
   
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.11.1
     container_name: filebeat
     user: root
     volumes:
-      - ./services/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ./logs:/var/log/app:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./services/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./logs:/usr/share/filebeat/logs
+      - filebeat-data:/usr/share/filebeat/data
     depends_on:
       - elastic
-    command: ["--strict.perms=false"]
-    mem_limit: 0.5g
+      - kibana
+    mem_limit: 1g
+    entrypoint: >
+      /bin/sh -c "
+      until curl -s http://elastic:9200 >/dev/null; do
+        echo 'Waiting for Elasticsearch...';
+        sleep 5;
+      done;
+      until curl -s http://kibana:5601/api/status | grep -q '\"summary\":\"All services are available\"'; do
+        echo 'Waiting for Kibana...';
+        sleep 5;
+      done;
+      filebeat setup --strict.perms=false;
+      filebeat -e --strict.perms=false"
+    networks:
+      - elk
+      - services
 
   redis:
     image: redis:7
@@ -107,17 +130,18 @@ services:
     networks:
       - services
 
-  # mailhog:
-  #   image: mailhog/mailhog
-  #   ports:
-  #     - "8025:8025"
-  #     - "1025:1025"
-  #   networks:
-  #     - services
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - services
 
 volumes:
   pgdata:
   elasticdata:
+  filebeat-data:
 
 networks:
   elk:

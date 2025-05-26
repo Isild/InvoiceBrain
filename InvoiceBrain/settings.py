@@ -167,25 +167,34 @@ SPECTACULAR_SETTINGS = {
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "invoicebrain_web_1"]
 
-# filebeat
+# Filebeat
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'json': {
             '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'fmt': '%(asctime)s %(levelname)s %(name)s %(message)s %(pathname)s %(lineno)d',
         },
     },
     'handlers': {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': '/var/log/app/app.log',
+            'filename': os.path.join(BASE_DIR, '/logs/app.log'),
             'formatter': 'json',
         },
     },
-    'root': {
-        'handlers': ['file'],
-        'level': 'INFO',
-    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'invoicebrain': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    }
 }
