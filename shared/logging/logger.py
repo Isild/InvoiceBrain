@@ -37,8 +37,8 @@ class AppLogger:
             "path": path,
             "request_id": request_id,
             "exception_type": type(exception).__name__ if exception else None,
-            # "timestamp": "twoj wiesz czo"
         }
+
         if exception:
             exc_info = (type(exception), exception, exception.__traceback__)
         else:

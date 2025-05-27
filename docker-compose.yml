@@ -111,6 +111,7 @@ services:
     entrypoint: ["/bin/sh", "-c", "chmod 600 InvoiceBrain/.pgpass && chmod 600 InvoiceBrain/.pg_service.conf && celery -A InvoiceBrain worker --loglevel=info"]
     volumes:
       - .:/code
+      - ./logs:/logs
     depends_on:
       - redis
     environment:
