@@ -40,6 +40,8 @@ The project focus on API site without(for now) frontend.
 
 [] Elasticsearch work on entities in relationship + filtering
 
+[] PySpark
+
 ## Setup
 
 First you must copy:
@@ -65,6 +67,8 @@ If you want to see sended mail you can go to `http://localhost:8025`
 Services like elastic and kibana can use a lot of memory. To handle it you can change RAM memory usage limit in docker-compose file: `mem_limit: 0.5g`
 
 If entrypoint can't run application due to long time of setting up elastic instance then increase `max RetryTimes`.
+
+Run all services may take a while.
 
 ## Documentation
 
