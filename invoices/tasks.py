@@ -19,7 +19,7 @@ def check_overdue_invoices():
 
 
 @shared_task
-def send_overdude_invoide_notification():
+def send_overdue_invoice_notification():
     subject = "Overdue"
     email = "test@test.pl"
     redis_key_pattern = "invoice:*:to-notifie"

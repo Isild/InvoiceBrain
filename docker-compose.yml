@@ -97,7 +97,6 @@ services:
       filebeat -e --strict.perms=false"
     networks:
       - elk
-      - services
 
   redis:
     image: redis:7
@@ -114,6 +113,7 @@ services:
       - ./logs:/logs
     depends_on:
       - redis
+      - web
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
     networks:
@@ -124,6 +124,7 @@ services:
     command: celery -A InvoiceBrain beat --loglevel=info
     volumes:
       - .:/app
+      - ./logs:/logs
     depends_on:
       - redis
       - web
