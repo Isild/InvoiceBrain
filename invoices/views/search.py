@@ -284,7 +284,7 @@ class SearchByDatesAPIView(APIView):
         serializer = InvoiceSerializer(results, many=True)
 
         return paginator.get_paginated_response(serializer.data)
-    
+   
 # TODO: add mappers with consts
 @extend_schema(
     tags=["invoices-search"],
