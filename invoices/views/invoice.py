@@ -4,7 +4,7 @@ from notifications.tasks import (send_mail_notification,
 from shared.logging.logger import AppLogger
 
 from ..models import Invoice
-from ..serializers import InvoiceSerializer
+from ..serializers import InvoiceModelSerializer
 from ..services.invoice_notifications import InvoiceNotificationService
 
 
@@ -12,7 +12,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     logger = AppLogger()
 
     queryset = Invoice.objects.all()
-    serializer_class = InvoiceSerializer
+    serializer_class = InvoiceModelSerializer
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

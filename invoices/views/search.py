@@ -5,13 +5,40 @@ from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Q
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ValidationError
+from datetime import datetime
 
 from ..documents import InvoiceDocument
-from ..serializers import InvoiceSerializer
+from ..serializers import InvoiceElasticsearchSerializer
 from ..pagination import ElasticPagination
 from utils.elasticsearch import validate_sort_fields
+
+
+def validate_date(date_str: str):
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d")
+    except (ValueError, TypeError):
+        raise ValidationError(f"Invalid date format: {date_str}, expected YYYY-MM-DD")
+
+
+def apply_sorting(request: Request, results, allowed_fields=None):
+    sort_by = request.GET.get('sort_by', '')
+    order = request.GET.get('order', '')
+
+    if bool(sort_by) != bool(order):
+        raise ValidationError("Missing query param for sorting: sort_by or order.")
+
+    if sort_by and allowed_fields and sort_by not in allowed_fields:
+        raise ValidationError(f"Invalid sort_by field: {sort_by}")
+
+    if sort_by and order:
+        sort_field = f"-{sort_by}" if order == 'desc' else sort_by
+        results = results.sort(sort_field)
+
+    return results
 
 @extend_schema(
     summary="Check connect with Elasticsearch",
@@ -19,13 +46,25 @@ from utils.elasticsearch import validate_sort_fields
     responses={200: {"type": "object", "properties": {"status": {"type": "string"}}}}
 )
 @api_view(['GET'])
-def elastic_health_check(request):
+def elastic_health_check(request: Request) -> Response:
     es = Elasticsearch(os.getenv("ELASTICSEARCH_HOST", "http://localhost:9200"))
 
     if es.ping():
-        return Response({"status":"connected"})
+        return Response({"status": "connected"})
     else:
-        return Response({"status":"not connected"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"status": "not connected"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class InvoiceSearchAPIView(APIView):
+    document = InvoiceDocument
+    serializer_class = InvoiceElasticsearchSerializer
+    pagination_class = ElasticPagination
+
+    def paginate_and_serialize(self, results, request: Request):
+        paginator = self.pagination_class()
+        paginated = paginator.paginate_queryset(results, request)
+        serializer = self.serializer_class(paginated, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 @extend_schema(
@@ -62,7 +101,7 @@ def elastic_health_check(request):
         ),
     ],
     responses={
-        200: InvoiceSerializer(many=True),
+        200: InvoiceElasticsearchSerializer(many=True),
         422: OpenApiExample(
             'Missing Parameter',
             value={"error": "Missing query param ?company_name=..."},
@@ -71,23 +110,17 @@ def elastic_health_check(request):
         ),
     },
 )
-class SearchByCompaniesNamesAPIView(APIView):
-    document = InvoiceDocument
-    serializer_class = InvoiceSerializer
-    pagination_class = ElasticPagination
-
-    def get(self, request):
+class SearchByCompaniesNamesAPIView(InvoiceSearchAPIView):
+    def get(self, request: Request) -> Response:
         query = request.GET.get('company_name', '')
-        sort_by = request.GET.get('sort_by', '')
-        order = request.GET.get('order', '')
-        
+
         if not query:
             return Response({
                 "error": "Missing query param ?company_name=..."
             }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         results = InvoiceDocument.search().query(
-            "multi_match", 
+            "multi_match",
             query=query,
             fields=['principal_company_name', 'reciepient_company_name'],
             type="best_fields",
@@ -96,21 +129,12 @@ class SearchByCompaniesNamesAPIView(APIView):
             minimum_should_match="75%"
         )
 
-        if sort_by and order:
-            sort_field = f"-{sort_by}" if order == 'desc' else sort_by
-            results = results.sort(sort_field)
-        elif bool(sort_by) != bool(order):
-            return Response({
-                "error": "Missing query param for sorting: sort_by or order."
-            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
-        paginator = self.pagination_class()
-        results = paginator.paginate_queryset(results, request)
+        try:
+            results = apply_sorting(request, results)
+        except ValidationError as error:
+            return Response({"error": str(error)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        serializer = InvoiceSerializer(results, many=True)
-
-        return paginator.get_paginated_response(serializer.data)
-
+        return self.paginate_and_serialize(results, request)
 
 
 @extend_schema(
@@ -123,100 +147,32 @@ class SearchByCompaniesNamesAPIView(APIView):
         OpenApiParameter(name='order', description='Sorting direction: asc lub desc', required=False, type=str),
         OpenApiParameter(name='page', description='Number of pagination page', required=False, type=int),
     ],
-    responses={200: InvoiceSerializer(many=True)}
+    responses={200: InvoiceElasticsearchSerializer(many=True)}
 )
-class SearchByNumberAPIView(APIView):
-    document = InvoiceDocument
-    serializer_class = InvoiceSerializer
-    pagination_class = ElasticPagination
-
-    def get(self, request):
+class SearchByNumberAPIView(InvoiceSearchAPIView):
+    def get(self, request: Request) -> Response:
         query = request.GET.get('number', '')
-        sort_by = request.GET.get('sort_by', '')
-        order = request.GET.get('order', '')
-        
+
         if not query:
             return Response({
                 "error": "Missing query param ?number=..."
             }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
 
         results = InvoiceDocument.search().query(
-            "match", 
+            "match",
             number={
-                'query':query,
-                'fuzziness':'AUTO'
+                'query': query,
+                'fuzziness': 'AUTO'
             }
         )
 
-        if sort_by and order:
-            sort_field = f"-{sort_by}" if order == 'desc' else sort_by
-            results = results.sort(sort_field)
-        elif bool(sort_by) != bool(order):
-            return Response({
-                "error": "Missing query param for sorting: sort_by or order."
-            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        try:
+            results = apply_sorting(request, results)
+        except ValidationError as error:
+            return Response({"error": str(error)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        paginator = self.pagination_class()
-        results = paginator.paginate_queryset(results, request)
+        return self.paginate_and_serialize(results, request)
 
-        serializer = InvoiceSerializer(results, many=True)
-
-        return paginator.get_paginated_response(serializer.data)
-
-@extend_schema(
-    tags=["invoices-search"],
-    summary="Search invoices by companies names",
-    description="Searches invoices using the given company name in either `principal_company_name` or `reciepient_company_name` fields. Supports optional sorting.",
-    parameters=[
-        OpenApiParameter(name="company_name", type=str, required=True, location=OpenApiParameter.QUERY, description="Company name to search for."),
-        OpenApiParameter(name="sort_by", type=str, required=False, location=OpenApiParameter.QUERY, description="Field to sort by."),
-        OpenApiParameter(name="order", type=str, required=False, location=OpenApiParameter.QUERY, description="Sorting order: asc or desc."),
-    ],
-    responses={
-        200: InvoiceSerializer(many=True),
-        422: OpenApiTypes.OBJECT,
-    }
-)
-class SearchByCompaniesNamesAPIView(APIView):
-    document = InvoiceDocument
-    serializer_class = InvoiceSerializer
-    pagination_class = ElasticPagination
-
-    def get(self, request):
-        query = request.GET.get('company_name', '')
-        sort_by = request.GET.get('sort_by', '')
-        order = request.GET.get('order', '')
-        
-        if not query:
-            return Response({
-                "error": "Missing query param ?company_name=..."
-            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
-        results = InvoiceDocument.search().query(
-            "multi_match", 
-            query=query,
-            fields=['principal_company_name', 'reciepient_company_name'],
-            type="best_fields",
-            operator="or",
-            fuzziness="AUTO",
-            minimum_should_match="75%"
-        )
-
-        if sort_by and order:
-            sort_field = f"-{sort_by}" if order == 'desc' else sort_by
-            results = results.sort(sort_field)
-        elif bool(sort_by) != bool(order):
-            return Response({
-                "error": "Missing query param for sorting: sort_by or order."
-            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
-        paginator = self.pagination_class()
-        results = paginator.paginate_queryset(results, request)
-
-        serializer = InvoiceSerializer(results, many=True)
-
-        return paginator.get_paginated_response(serializer.data)
 
 @extend_schema(
     tags=["invoices-search"],
@@ -228,16 +184,12 @@ class SearchByCompaniesNamesAPIView(APIView):
         OpenApiParameter(name="date_to", type=str, required=False, location=OpenApiParameter.QUERY, description="End date (YYYY-MM-DD)."),
     ],
     responses={
-        200: InvoiceSerializer(many=True),
+        200: InvoiceElasticsearchSerializer(many=True),
         422: OpenApiTypes.OBJECT,
     }
 )
-class SearchByDatesAPIView(APIView):
-    document = InvoiceDocument
-    serializer_class = InvoiceSerializer
-    pagination_class = ElasticPagination
-
-    def get(self, request):
+class SearchByDatesAPIView(InvoiceSearchAPIView):
+    def get(self, request: Request) -> Response:
         query = request.GET.get('date_names', '')
         date_from = request.GET.get('date_from')
         date_to = request.GET.get('date_to')
@@ -278,13 +230,9 @@ class SearchByDatesAPIView(APIView):
             Q("bool", should=date_filters, minimum_should_match=1)
         )
 
-        paginator = self.pagination_class()
-        results = paginator.paginate_queryset(results, request)
+        return self.paginate_and_serialize(results, request)
 
-        serializer = InvoiceSerializer(results, many=True)
 
-        return paginator.get_paginated_response(serializer.data)
-   
 # TODO: add mappers with consts
 @extend_schema(
     tags=["invoices-search"],
@@ -294,16 +242,12 @@ class SearchByDatesAPIView(APIView):
         OpenApiParameter(name="phrase", type=str, required=True, location=OpenApiParameter.QUERY, description="Phrase to search in description or product name."),
     ],
     responses={
-        200: InvoiceSerializer(many=True),
+        200: InvoiceElasticsearchSerializer(many=True),
         422: OpenApiTypes.OBJECT,
     }
 )
-class SearchByDescribeProductsAPIView(APIView):
-    document = InvoiceDocument
-    serializer_class = InvoiceSerializer
-    pagination_class = ElasticPagination
-
-    def get(self, request):
+class SearchByDescribeProductsAPIView(InvoiceSearchAPIView):
+    def get(self, request: Request) -> Response:
         phrase = request.GET.get('phrase', '')
 
         if not phrase:
@@ -320,9 +264,4 @@ class SearchByDescribeProductsAPIView(APIView):
             minimum_should_match=1
         )
 
-        paginator = self.pagination_class()
-        results = paginator.paginate_queryset(results, request)
-
-        serializer = InvoiceSerializer(results, many=True)
-
-        return paginator.get_paginated_response(serializer.data)
+        return self.paginate_and_serialize(results, request)
