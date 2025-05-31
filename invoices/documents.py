@@ -4,6 +4,7 @@ from .models import Invoice
 
 invoice_index = Index('invoices')
 
+
 @registry.register_document
 class InvoiceDocument(Document):
     ELASTIC_ALLOWED_SEARCH_FIELDS = {

@@ -4,7 +4,8 @@ from rest_framework import status
 
 import math
 
-class ElasticPagination(PageNumberPagination):
+
+class BasePagination(PageNumberPagination):
     page_size = 20
     page_size_query_param = 'page_size'
     max_page_size = 100
@@ -12,6 +13,17 @@ class ElasticPagination(PageNumberPagination):
     next = ''
     previous = None
 
+    def get_paginated_response(self, data):
+        return Response({
+            'results': data,
+            'count': self.count,
+            'page_size': self.page_size,
+            'page': self.page_number,
+            'last_page': self.last_page,
+        }, status=status.HTTP_200_OK)
+
+
+class ElasticPagination(BasePagination):
     def paginate_queryset(self, queryset, request, view=None):
         self.request = request
         self.page_size = self.get_page_size(request)
@@ -24,12 +36,3 @@ class ElasticPagination(PageNumberPagination):
         # TODO: add next, previous
 
         return queryset[self.offset:self.offset + self.limit].execute()
-    
-    def get_paginated_response(self, data):
-        return Response({
-            'results': data,
-            'count': self.count,
-            'page_size': self.page_size,
-            'page': self.page_number,
-            'last_page': self.last_page,
-        }, status=status.HTTP_200_OK)
