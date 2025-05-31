@@ -4,6 +4,9 @@ from django.utils import timezone
 from .models import Invoice
 from utils.redis_client import redis_client
 from redis.exceptions import WatchError
+from invoices.notifications.overdue_invoice_notification import OverdueInvoiceMailNotify
+from invoices.services.invoice_notifications import InvoiceNotificationService
+
 
 @shared_task
 def check_overdue_invoices():
@@ -20,9 +23,9 @@ def check_overdue_invoices():
 
 @shared_task
 def send_overdue_invoice_notification():
-    subject = "Overdue"
-    email = "test@test.pl"
     redis_key_pattern = "invoice:*:to-notifie"
+
+    invoice_notification_service = InvoiceNotificationService()
 
     for key in redis_client.scan_iter(match=redis_key_pattern):
         invoice_id = key.split(':')[1]
@@ -32,20 +35,15 @@ def send_overdue_invoice_notification():
                 pipe.watch(key)
 
                 if pipe.get(key) == '1':
-                    message = f"Invoice is overdue, ID: {invoice_id}"
-
-                    send_mail(subject, message, 'no-reply@invoicebrain.com', [email])
+                    invoice_notification_service.send_invoice_overdue_notification(invoice_id)
 
                     updated = Invoice.objects.filter(id=invoice_id, sended_overdude_notification_at=None).update(sended_overdude_notification_at=timezone.now())
 
                     if updated:
                         pipe.delete(f'invoice:{invoice_id}:to-notifie')
-                    # TODO: add else throwing error with that notification
-
                     pipe.execute()
 
             except WatchError:
                 continue
-            # TODO: add send mail errors handling
             finally:
                 redis_client.unwatch()
