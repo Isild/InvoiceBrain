@@ -1,6 +1,4 @@
 from rest_framework import viewsets
-from notifications.tasks import (send_mail_notification,
-                                 send_paid_invoice_notification)
 from shared.logging.logger import AppLogger
 
 from ..models import Invoice
