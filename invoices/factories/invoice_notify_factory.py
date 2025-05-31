@@ -1,6 +1,6 @@
 from invoices.notifications.new_invoice_mail_notify import NewInvoiceMailNotify
-from invoices.notifications.paid_invoice_mail_notify import PaidInvoiceMailNotify
 from invoices.notifications.overdue_invoice_notification import OverdueInvoiceMailNotify
+from invoices.notifications.paid_invoice_mail_notify import PaidInvoiceMailNotify
 from shared.notifications.mail_notify import MailNotify
 
 

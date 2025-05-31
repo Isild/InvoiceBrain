@@ -1,5 +1,3 @@
-
-
 class NotificationMailMissingFieldException(Exception):
     def __init__(self, message: str, *, feature: str = None, details: dict = None):
         super().__init__(message)

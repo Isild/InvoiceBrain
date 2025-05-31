@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import Invoice
 
 
@@ -12,7 +13,7 @@ class InvoiceModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Invoice
-        fields = '__all__'
+        fields = "__all__"
         read_only_fields = ("created_at", "updated_at")
 
 

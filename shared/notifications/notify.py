@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from shared.logging.logger import AppLogger
 
 
@@ -7,7 +8,9 @@ class Notify(ABC):
     logger = AppLogger()
 
     @abstractmethod
-    def _get_valid_message_fields(self, fields_to_check: dict[str, str]) -> dict[str, str]:
+    def _get_valid_message_fields(
+        self, fields_to_check: dict[str, str]
+    ) -> dict[str, str]:
         pass
 
     @abstractmethod
@@ -15,5 +18,7 @@ class Notify(ABC):
         pass
 
     @abstractmethod
-    def send(self, mails: list[str], subject: str, message_data: dict[str, str]) -> None:
+    def send(
+        self, mails: list[str], subject: str, message_data: dict[str, str]
+    ) -> None:
         pass

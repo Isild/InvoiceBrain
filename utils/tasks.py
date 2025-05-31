@@ -1,7 +1,9 @@
-from django_celery_beat.models import IntervalSchedule, PeriodicTask
-from django.db.utils import OperationalError, ProgrammingError
-from shared.logging.logger import AppLogger
 from typing import Literal
+
+from django.db.utils import OperationalError, ProgrammingError
+from django_celery_beat.models import IntervalSchedule, PeriodicTask
+
+from shared.logging.logger import AppLogger
 
 logger = AppLogger()
 
@@ -10,11 +12,13 @@ Period = Literal[
     IntervalSchedule.HOURS,
     IntervalSchedule.MINUTES,
     IntervalSchedule.SECONDS,
-    IntervalSchedule.MICROSECONDS
+    IntervalSchedule.MICROSECONDS,
 ]
 
 
-def create_periodic_task(task_name: str, task_path: str, every: int, period: Period) -> bool:
+def create_periodic_task(
+    task_name: str, task_path: str, every: int, period: Period
+) -> bool:
     """
     Creates or updates a periodic Celery task.
 
@@ -28,14 +32,11 @@ def create_periodic_task(task_name: str, task_path: str, every: int, period: Per
     """
     try:
         schedule, _ = IntervalSchedule.objects.update_or_create(
-            every=every+1,
-            period=period
+            every=every + 1, period=period
         )
 
         PeriodicTask.objects.update_or_create(
-            interval=schedule,
-            name=task_name+"dupa",
-            task=task_path
+            interval=schedule, name=task_name + "dupa", task=task_path
         )
 
         return True
@@ -45,7 +46,7 @@ def create_periodic_task(task_name: str, task_path: str, every: int, period: Per
             message="Unhandled exception",
             exception=exception,
             path=None,
-            request_id=None
+            request_id=None,
         )
 
         return False

@@ -1,4 +1,3 @@
-
 class AppException(Exception):
     def __init__(self, message: str, code: str = "app_error", status_code: int = 500):
         self.message = message

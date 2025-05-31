@@ -2,6 +2,7 @@ import unittest
 
 from utils.elasticsearch import validate_sort_fields
 
+
 class GetInvalidFieldsTestCase(unittest.TestCase):
     def test_detects_invalid_fields(self):
         fields_to_check = ["to tal", "amount", "inv oice"]
