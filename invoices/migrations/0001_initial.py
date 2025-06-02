@@ -7,23 +7,30 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Invoice',
+            name="Invoice",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('number', models.CharField(max_length=100)),
-                ('principal_company_name', models.CharField(max_length=200)),
-                ('reciepient_company_name', models.CharField(max_length=200)),
-                ('issue_date', models.DateTimeField()),
-                ('paument_due_date', models.DateTimeField()),
-                ('payment_date', models.DateTimeField(null=True)),
-                ('total', models.IntegerField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("number", models.CharField(max_length=100)),
+                ("principal_company_name", models.CharField(max_length=200)),
+                ("reciepient_company_name", models.CharField(max_length=200)),
+                ("issue_date", models.DateTimeField()),
+                ("paument_due_date", models.DateTimeField()),
+                ("payment_date", models.DateTimeField(null=True)),
+                ("total", models.IntegerField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
     ]

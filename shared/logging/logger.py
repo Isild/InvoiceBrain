@@ -1,8 +1,8 @@
-import logging
 import json
+import logging
 import os
-
 from datetime import datetime
+
 
 class JsonFileFormatter(logging.Formatter):
     def format(self, record):
@@ -12,7 +12,9 @@ class JsonFileFormatter(logging.Formatter):
             "feature": getattr(record, "feature", None),
             "message": record.getMessage(),
             "exception_type": getattr(record, "exception_type", None),
-            "exception": self.formatException(record.exc_info) if record.exc_info else None,
+            "exception": (
+                self.formatException(record.exc_info) if record.exc_info else None
+            ),
             "path": getattr(record, "path", None),
             "request_id": getattr(record, "request_id", None),
         }
@@ -31,7 +33,9 @@ class AppLogger:
             handler.setFormatter(JsonFileFormatter())
             self.logger.addHandler(handler)
 
-    def log_exception(self, feature, message, exception=None, path=None, request_id=None):
+    def log_exception(
+        self, feature, message, exception=None, path=None, request_id=None
+    ):
         extra = {
             "feature": feature,
             "path": path,
@@ -50,6 +54,6 @@ class AppLogger:
             "feature": feature,
             "path": path,
             "request_id": request_id,
-            "log_moj_type": "info"
+            "log_moj_type": "info",
         }
         self.logger.info(message, extra=extra)

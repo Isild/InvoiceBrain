@@ -1,23 +1,25 @@
 from django_elasticsearch_dsl import Document, Index, fields
 from django_elasticsearch_dsl.registries import registry
+
 from .models import Invoice
 
-invoice_index = Index('invoices')
+invoice_index = Index("invoices")
+
 
 @registry.register_document
 class InvoiceDocument(Document):
     ELASTIC_ALLOWED_SEARCH_FIELDS = {
-        'issue_date',
-        'payment_due_date',
-        'payment_date',
-        'created_at',
-        'updated_at',
+        "issue_date",
+        "payment_due_date",
+        "payment_date",
+        "created_at",
+        "updated_at",
     }
 
     products = fields.NestedField(
         properties={
-            'name': fields.TextField(),
-            'price': fields.IntegerField(),
+            "name": fields.TextField(),
+            "price": fields.IntegerField(),
         }
     )
     description = fields.TextField()
@@ -28,23 +30,20 @@ class InvoiceDocument(Document):
     payment_due_date = fields.DateField()
     payment_date = fields.DateField()
     total = fields.IntegerField()
-    created_at  = fields.DateField()
+    created_at = fields.DateField()
 
     class Index:
-        name = 'invoices'
+        name = "invoices"
 
     class Django:
         model = Invoice
         fields = [
-            'updated_at',
+            "updated_at",
         ]
 
     def prepare_products(self, instance):
         return [
-            {
-                'name': p.get('name', ''),
-                'price': int(p.get('price', 0))
-            }
+            {"name": p.get("name", ""), "price": int(p.get("price", 0))}
             for p in instance.products or []
             if isinstance(p, dict)
         ]

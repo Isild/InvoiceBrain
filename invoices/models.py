@@ -3,6 +3,7 @@ from django.utils import timezone
 
 # Create your models here.
 
+
 class Invoice(models.Model):
     number = models.CharField(max_length=100)
     principal_company_name = models.CharField(max_length=200)
@@ -11,7 +12,7 @@ class Invoice(models.Model):
     payment_due_date = models.DateTimeField()
     payment_date = models.DateTimeField(null=True)
     total = models.IntegerField()
-    description = models.CharField(max_length=2048, default='')
+    description = models.CharField(max_length=2048, default="")
     products = models.JSONField(default=dict)
     # file = models.FileField(upload_to="invoices/")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -22,10 +23,9 @@ class Invoice(models.Model):
         return f"Invoice {self.number} - {self.principal_company_name}"
 
     def was_payed(self):
-        return self.payment_date != None
-    
-    def outstanding_unpaid(self, checking_date = None):
+        return self.payment_date is not None
+
+    def outstanding_unpaid(self, checking_date=None):
         checking_date = checking_date or timezone.now()
 
         return bool(self.payment_date) or checking_date > self.payment_due_date
-

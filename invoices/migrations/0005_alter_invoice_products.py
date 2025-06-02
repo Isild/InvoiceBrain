@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('invoices', '0004_invoice_sended_overdude_notification_at'),
+        ("invoices", "0004_invoice_sended_overdude_notification_at"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='invoice',
-            name='products',
+            model_name="invoice",
+            name="products",
             field=models.JSONField(default=dict),
         ),
     ]

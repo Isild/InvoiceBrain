@@ -1,23 +1,25 @@
 from rest_framework import viewsets
 
-from notifications.tasks import (send_new_invoice_notification,
-                                 send_paid_invoice_notification)
 from shared.logging.logger import AppLogger
-from utils.logger_helpers import generate_exception_response
 
 from ..models import Invoice
-from ..serializers import InvoiceSerializer
+from ..serializers import InvoiceModelSerializer
+from ..services.invoice_notifications import InvoiceNotificationService
 
 
 class InvoiceViewSet(viewsets.ModelViewSet):
     logger = AppLogger()
 
     queryset = Invoice.objects.all()
-    serializer_class = InvoiceSerializer
+    serializer_class = InvoiceModelSerializer
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.invoice_notification_service = InvoiceNotificationService()
 
     def perform_create(self, serializer):
         invoice = serializer.save()
-        send_new_invoice_notification.delay("email@test.com", invoice.id)
+        self.invoice_notification_service.send_invoice_created_notification(invoice)
 
     def perform_update(self, serializer):
         old_invoice_payment_date = self.get_object().payment_date
@@ -25,4 +27,4 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         invoice = serializer.save()
 
         if invoice.payment_date != old_invoice_payment_date and invoice.payment_date:
-            send_paid_invoice_notification.delay("email@test.com", invoice.id, invoice.payment_date)
+            self.invoice_notification_service.send_invoice_paid_notification(invoice)
