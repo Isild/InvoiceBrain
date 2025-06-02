@@ -38,7 +38,7 @@ The project focus on API site without(for now) frontend.
 
 [] JWT Auth
 
-[] Elasticsearch work on entities in relationship + filtering
+[] Elasticsearch work on entities in relationship + filtering + summary view
 
 [] PySpark
 
